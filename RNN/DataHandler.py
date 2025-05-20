@@ -2,16 +2,20 @@ import tensorflow as tf
 import pathlib
 import numpy as np
 class DataHandler:
-    def __init__(self, dataset_file_name, dataset_file_origin, sequence_length, batch_size):
+    def __init__(self, dataset_file_name, dataset_file_origin, sequence_length, batch_size, train_end, val_end):
         self.dataset_file_name = dataset_file_name
         self.dataset_file_origin = dataset_file_origin
         self.sequence_length = sequence_length
         self.batch_size = batch_size
+        self.train_end = train_end
+        self.val_end = val_end
 
         self.text = self.read_data()
         self.char2index, self.index2char, self.text_as_int, self.vocab_size = self.process_data()
-        self.dataset_sequences = self.create_training_sequences()
-        self.dataset_batches = self.create_batches()
+        self.split_data(self.train_end, self.val_end)
+        self.train_batches = self.create_batches(self.train_data)
+        self.val_batches = self.create_batches(self.val_data)
+        self.test_batches = self.create_batches(self.test_data)
 
     def read_data(self):
         '''
@@ -53,24 +57,27 @@ class DataHandler:
 
         return char2index, index2char, text_as_int, len(vocab)
     
+    def split_data(self, train_end, val_end):
+        total_len = len(self.text_as_int)
+        train_end = int(train_end * total_len)
+        val_end = int(val_end * total_len)
 
-    def create_training_sequences(self):
+        self.train_data = self.text_as_int[: train_end]
+        self.val_data = self.text_as_int[train_end: val_end]
+        self.test_data = self.text_as_int[val_end:]
+    
+
+    def create_batches(self, data):
         '''
-        Creates training sequences from encoded text for input.
+        Creates batches of training sequences from encoded text for input.
         '''
-        char_dataset = tf.data.Dataset.from_tensor_slices(self.text_as_int)
+        char_dataset = tf.data.Dataset.from_tensor_slices(data)
         sequences = char_dataset.batch(self.sequence_length+1, drop_remainder=True)
         dataset_sequences = sequences.map(self.split_input_target)
-        return dataset_sequences
-
+        return dataset_sequences.shuffle(10000).batch(self.batch_size, drop_remainder=True)
 
     def split_input_target(self, chunk):
         input_text = chunk[:-1]
         target_text = chunk[1:]
         return input_text, target_text
-    
-
-    def create_batches(self):
-        dataset_batches = self.dataset_sequences.shuffle(10000).batch(self.batch_size, drop_remainder=True)
-        return dataset_batches
     

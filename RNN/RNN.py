@@ -3,7 +3,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import SimpleRNN, Dense, Embedding
 from DataHandler import DataHandler
 class RNN:
-    def build_model(self, batch_size, sequence_length, vocab_size, embedding_dim, n_rnn_units, learning_rate):
+    def build_model(self, batch_size, sequence_length, vocab_size, embedding_dim, n_rnn_units, learning_rate, num_layers):
         # Creates a Keras Sequential model,meaning the layers are stacked
         # from input to output.
         inputs = tf.keras.Input(
@@ -19,6 +19,7 @@ class RNN:
             units=n_rnn_units,
             return_sequences=True,
             stateful=True,
+            kernel_initializer='he_uniform',
             recurrent_initializer='glorot_uniform'
         )(x)
 

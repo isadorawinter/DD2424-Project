@@ -20,6 +20,7 @@ class LSTM:
                 units=n_rnn_units,
                 return_sequences=True,
                 stateful=True,
+                kernel_initializer='he_uniform',
                 recurrent_initializer='glorot_uniform'
             )(x)
 
