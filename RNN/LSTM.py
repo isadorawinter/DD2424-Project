@@ -4,8 +4,7 @@ from tensorflow.keras.layers import LSTM, Dense, Embedding
 from DataHandler import DataHandler
 class LSTM:
     def build_model(self, batch_size, sequence_length, vocab_size, embedding_dim, n_rnn_units, learning_rate, num_layers):
-        # Creates a Keras Sequential model,meaning the layers are stacked
-        # from input to output.
+      
         inputs = tf.keras.Input(
             batch_shape=(batch_size, sequence_length), dtype=tf.int32
         )
